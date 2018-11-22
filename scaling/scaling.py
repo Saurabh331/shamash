@@ -51,7 +51,7 @@ class Scale(object):
             self.cluster_settings.DownContainerPendingRatio
         if self.preemptible_pct != 100:
             self.preemptibles_to_workers_ratio = self.preemptible_pct / (
-                100 - self.preemptible_pct)
+                    100 - self.preemptible_pct)
         else:
             self.preemptibles_to_workers_ratio = -1
 
@@ -123,13 +123,14 @@ class Scale(object):
         if self.use_memory:
             logging.info("no more mem")
             if self.dataproc.get_yarn_memory_available_percentage() == 0:
+                yarn_mem_available = self.dataproc.get_yarn_memory_available()
                 yarn_memory_mb_allocated, yarn_memory_mb_pending = \
                     self.dataproc.get_memory_data()
                 ratio = float(
                     int(yarn_memory_mb_allocated) / int(self.current_nodes))
                 if ratio == 0:
                     ratio = 1
-                factor = float(int(yarn_memory_mb_pending) / ratio)
+                factor = float(int(yarn_memory_mb_pending + yarn_mem_available) / ratio)
                 if self.cluster_settings.AddRemoveUpDelta != 0:
                     self.total = self.current_nodes + self.cluster_settings.AddRemoveUpDelta
                 else:

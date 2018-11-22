@@ -98,11 +98,28 @@ class DataProc(object):
             total_memory = yarn_memory_mb_allocated + yarn_memory_mb_available
             if total_memory == 0:
                 return 0
-            return int(yarn_memory_mb_available) / int(total_memory)
+            return float(yarn_memory_mb_available) / float(total_memory)
+        except DataProcException as e:
+            logging.error(e)
+            raise
+    #my changes
+    def get_yarn_memory_available(self):
+        """The percentage of remaining memory available to YARN
+        yarn-memory-mb-available + yarn-memory-mb-allocated = Total cluster
+         memory.
+         yarn_memory_mb_available / Total Cluster Memory
+
+        """
+        try:
+            yarn_memory_mb_available = int(
+                self.get_yarn_metric('yarn-memory-mb-available'))
+            return yarn_memory_mb_available
+
         except DataProcException as e:
             logging.error(e)
             raise
 
+    #my changes
     def get_container_pending_ratio(self):
         """The ratio of pending containers to containers allocated
         (ContainerPendingRatio = ContainerPending / ContainerAllocated).
@@ -230,16 +247,16 @@ class DataProc(object):
             monitor_data = {
                 'cluster': self.cluster_name,
                 'yarn_memory_available_percentage':
-                float(self.get_yarn_memory_available_percentage()),
+                    float(self.get_yarn_memory_available_percentage()),
                 'container_pending_ratio':
-                float(self.get_container_pending_ratio()),
+                    float(self.get_container_pending_ratio()),
                 'number_of_nodes':
-                int(self.get_yarn_metric('yarn-nodes-active')),
+                    int(self.get_yarn_metric('yarn-nodes-active')),
                 'worker_nodes': int(self.get_number_of_workers()),
                 'yarn_containers_pending':
-                int(self.get_yarn_metric('yarn-containers-pending')),
+                    int(self.get_yarn_metric('yarn-containers-pending')),
                 'preemptible_workers':
-                self.get_number_of_preemptible_workers()
+                    self.get_number_of_preemptible_workers()
             }
             if self.cluster_settings.PreemptiblePct != 0:
                 monitor_data['preemptible_nodes'] = int(
