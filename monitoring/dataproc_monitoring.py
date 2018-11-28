@@ -104,10 +104,7 @@ class DataProc(object):
             raise
     #my changes
     def get_yarn_memory_available(self):
-        """The percentage of remaining memory available to YARN
-        yarn-memory-mb-available + yarn-memory-mb-allocated = Total cluster
-         memory.
-         yarn_memory_mb_available / Total Cluster Memory
+        """memory available in Cluster
 
         """
         try:

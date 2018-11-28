@@ -143,7 +143,46 @@ class Scale(object):
                 logging.debug('No More Mem! New workers %s  prev %s',
                               self.total, self.current_nodes)
                 return
-            self.calc_scale()
+            if self.dataproc.get_yarn_memory_available_percentage() > 0:
+                # Calculate total memory of the cluster
+
+                yarn_memory_mb_allocated, yarn_memory_mb_pending = \
+                    self.dataproc.get_memory_data()
+
+                yarn_memory_mb_available = self.dataproc.get_yarn_memory_available()
+                yarn_memory_mb_total = yarn_memory_mb_available + yarn_memory_mb_allocated
+
+                logging.debug(
+                    'yarn_memory_mb_allocated %s Available %s Total %s ', yarn_memory_mb_allocated,
+                    yarn_memory_mb_allocated, yarn_memory_mb_available, yarn_memory_mb_total)
+
+                # Get yarn available memory required for down scaling
+
+                DownYARNMemAvailePctself = self.cluster_settings.DownYARNMemAvailePct
+
+                ActualMemFraction = float(yarn_memory_mb_available / yarn_memory_mb_total)
+
+                logging.debug(
+                    'Actual yarn memory Available %s Per node %s required for down scaling %s ',
+                    yarn_memory_mb_available, ActualMemFraction,
+                    DownYARNMemAvailePctself)
+
+                if ActualMemFraction >= DownYARNMemAvailePctself:
+                    # Calculate number of nodes which can be released
+                    MemPerNode = float(yarn_memory_mb_total / self.current_nodes)
+                    FreeNodes = int(yarn_memory_mb_available / MemPerNode)
+                    ExtNodes = int(FreeNodes / 2)
+                    self.total = int(self.current_nodes - ExtNodes)
+
+                logging.debug(
+                    'Yarn memory allocated %s pending %s available %s per node %s'
+                    ' current %s total after scaling %s', yarn_memory_mb_allocated,
+                    yarn_memory_mb_pending, yarn_memory_mb_available, MemPerNode, self.current_nodes,
+                    self.total)
+                logging.debug('Free memory Available!! Scaling down : New total workers %s  prev %s',
+                              self.total, self.current_nodes)
+                return
+            # self.calc_scale()
 
     def do_scale(self):
         """

@@ -69,11 +69,10 @@ def should_scale(payload):
         scaling_direction = 'up'
         containerpendingratio = container_pending_ratio
         logging.info("container_pending_ratio %> cluster_settings.UpContainerPendingRatio")
-    #Commented the down container pending ratio issue
-    # elif container_pending_ratio < cluster_settings.DownContainerPendingRatio:
-    #     scaling_direction = 'down'
-    #     containerpendingratio = container_pending_ratio
-    #     logging.info("container_pending_ratio < cluster_settings.DownContainerPendingRatio")
+    elif container_pending_ratio < cluster_settings.DownContainerPendingRatio:
+        scaling_direction = 'down'
+        containerpendingratio = container_pending_ratio
+        logging.info("container_pending_ratio < cluster_settings.DownContainerPendingRatio")
     elif yarn_memory_available_percentage == 1:
         logging.info("yarn_memory_available_percentage == 1")
         if number_of_nodes > cluster_settings.MinInstances:
@@ -81,11 +80,11 @@ def should_scale(payload):
             scaling_direction = 'down'
             scale_to = cluster_settings.MinInstances
     # We don't have enough memory lets go up
-    elif yarn_memory_available_percentage < cluster_settings.UpYARNMemAvailPct:
+    elif (yarn_memory_available_percentage * 100) < cluster_settings.UpYARNMemAvailPct:
         logging.info("yarn_memory_available_percentage < cluster_settings.UpYARNMemAvailPct")
         scaling_direction = 'up'
     # we have too much memory  :)
-    elif yarn_memory_available_percentage > \
+    elif (yarn_memory_available_percentage * 100) > \
             cluster_settings.DownYARNMemAvailePct:
         logging.info("yarn_memory_available_percentage > cluster_settings.DownYARNMemAvailePct:")
         scaling_direction = 'down'
