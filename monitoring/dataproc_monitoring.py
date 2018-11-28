@@ -110,6 +110,9 @@ class DataProc(object):
         try:
             yarn_memory_mb_available = int(
                 self.get_yarn_metric('yarn-memory-mb-available'))
+            logging.debug(
+                'yarn_memory_mb_available %s ', yarn_memory_mb_available)
+
             return yarn_memory_mb_available
 
         except DataProcException as e:

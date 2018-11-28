@@ -130,15 +130,16 @@ class Scale(object):
                     int(yarn_memory_mb_allocated) / int(self.current_nodes))
                 if ratio == 0:
                     ratio = 1
-                factor = float(int(yarn_memory_mb_pending + yarn_mem_available) / ratio)
+                factor = float(int(yarn_memory_mb_pending) / ratio)
                 if self.cluster_settings.AddRemoveUpDelta != 0:
                     self.total = self.current_nodes + self.cluster_settings.AddRemoveUpDelta
                 else:
-                    self.total = int(self.current_nodes * factor)
+                    if factor != 0:
+                        self.total = int(self.current_nodes * factor)
                 logging.debug(
-                    'yarn_memory_mb_allocated %s pending %s ratio %s factor %s'
+                    'yarn_memory_mb_allocated %s pending %s available %s ratio %s factor %s'
                     ' current %s total %s', yarn_memory_mb_allocated,
-                    yarn_memory_mb_pending, ratio, factor, self.current_nodes,
+                    yarn_memory_mb_pending, yarn_mem_available, ratio, factor, self.current_nodes,
                     self.total)
                 logging.debug('No More Mem! New workers %s  prev %s',
                               self.total, self.current_nodes)
